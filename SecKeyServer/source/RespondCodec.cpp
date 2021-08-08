@@ -1,57 +1,56 @@
 /*************************************************************************
-	> File Name: RequestCodec.cpp
+	> File Name: RespondCodec.cpp
 	> Author: lbw
 	> Mail: 296273803@qq.com 
-	> Created Time: 2021年08月06日 星期五 20时19分42秒
+	> Created Time: 2021年08月07日 星期六 12时11分04秒
  ************************************************************************/
 
 #include <iostream>
 #include <string>
-#include "RequestCodec.h"
-#include "RequestMsg.pb.h"
+#include "RespondCodec.h"
 using namespace std;
 
-RequestCodec::RequestCodec()
+RespondCodec::RespondCodec()
 {
 }
 
-RequestCodec::RequestCodec(string encStr)
+RespondCodec::RespondCodec(string encStr)
 {
 	initMessage(encStr);
 }
 
-RequestCodec::RequestCodec(RequestInfo* info)
+RespondCodec::RespondCodec(RespondInfo* info)
 {
 	initMessage(info);
 }
 
-void RequestCodec::initMessage(string encStr)
+void RespondCodec::initMessage(string encStr)
 {
 	m_encStr = encStr;
 }
 
-void RequestCodec::initMessage(RequestInfo* info)
+void RespondCodec::initMessage(RespondInfo* info)
 {
-	m_msg.set_cmdtype(info->cmdType);
+	m_msg.set_status(info->status);
+	m_msg.set_seckeyid(info->secKeyID);
 	m_msg.set_clientid(info->clientID);
 	m_msg.set_serverid(info->serverID);
-	m_msg.set_sign(info->sign);
 	m_msg.set_data(info->data);
 }
 
-string RequestCodec::encodeMsg()
+string RespondCodec::encodeMsg()
 {
 	string output;
 	m_msg.SerializeToString(&output);
 	return output;
 }
 
-void* RequestCodec::decodeMsg()
+void* RespondCodec::decodeMsg()
 {
 	m_msg.ParseFromString(m_encStr);
 	return &m_msg;
 }
 
-RequestCodec::~RequestCodec()
+RespondCodec::~RespondCodec()
 {
 }

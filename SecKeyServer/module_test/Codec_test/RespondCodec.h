@@ -1,39 +1,39 @@
 /*************************************************************************
-	> File Name: RequestCodec.h
+	> File Name: RespondCodec.h
 	> Author: lbw
 	> Mail: 296273803@qq.com 
-	> Created Time: 2021年08月06日 星期五 19时32分01秒
+	> Created Time: 2021年08月07日 星期六 11时51分49秒
  ************************************************************************/
 
 #pragma once
 #include <iostream>
 #include <string>
 #include "Codec.h"
-#include "RequestMsg.pb.h"
+#include "RespondMsg.pb.h"
 using namespace std;
 
-struct RequestInfo
+struct RespondInfo
 {
-	int cmdType;
+	int status;
+	int secKeyID;
 	string clientID;
 	string serverID;
-	string sign;
 	string data;
 };
 
-class RequestCodec : public Codec
+class RespondCodec : public Codec
 {
-public:	
-	RequestCodec();
-	RequestCodec(string encStr);
-	RequestCodec(RequestInfo* info);
+public:
+	RespondCodec();
+	RespondCodec(string encStr);
+	RespondCodec(RespondInfo* info);
 	void initMessage(string encStr);
-	void initMessage(RequestInfo* info);
+	void initMessage(RespondInfo* info);
 	string encodeMsg() override;
 	void* decodeMsg() override;
-	~RequestCodec();
+	~RespondCodec();
 
 private:
 	string m_encStr;
-	RequestMsg m_msg;
+	RespondMsg m_msg;
 };
