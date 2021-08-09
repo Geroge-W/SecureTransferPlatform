@@ -25,6 +25,7 @@ static void* callback(void* arg)
 		sockTcp->sendMsg(sendMsg);
 	}
 	sockTcp->disConnect();
+	delete sockTcp;
 	pthread_exit(nullptr);
 }
 

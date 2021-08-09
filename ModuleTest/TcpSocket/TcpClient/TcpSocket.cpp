@@ -51,11 +51,13 @@ int TcpSocket::connectToHost(string ip, unsigned short port, int timeout)
 	serverAddr.sin_port = htons(port);
 	if (inet_pton(AF_INET, ip.c_str(), &serverAddr.sin_addr) == 0) {
 		ret = ParamError;
+		disConnect();
 		return ret;
 	}
 	/* 向对方进程发起连接 */
 	ret = connectTimeout(&serverAddr, timeout);
 	if (ret < 0) {
+		disConnect();
 		if (ret == -1 && errno == ETIMEDOUT) {
 			ret = TimeoutError;
 			return ret;
