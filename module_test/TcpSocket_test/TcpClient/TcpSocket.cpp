@@ -129,7 +129,7 @@ string TcpSocket::recvMsg(int timeout)
 		return string();
 	}
 	else if (ret < 4) {
-		fprintf(stderr, "readn error peer closed: %d\n", ret);
+		fprintf(stderr, "The other progress closes the connection\n");
 		return string();
 	}
 	/* 网络字节序 -> 主机字节序 */
@@ -147,7 +147,7 @@ string TcpSocket::recvMsg(int timeout)
 		fprintf(stderr, "readn error: %d\n", ret);
 		return string();
 	} else if (ret < n) {
-		fprintf(stderr, "readn error peer closed: %d\n", ret);
+		fprintf(stderr, "The other progress closes the connection\n");
 		return string();
 	}
 	tmpBuf[n] = '\0';
@@ -157,6 +157,13 @@ string TcpSocket::recvMsg(int timeout)
 	return data;
 }
 
+void TcpSocket::disConnect()
+{
+	if (m_socket > 0) {
+		close(m_socket);
+		m_socket = -1;
+	}
+}
 /*
 * setNonBlock - 设置I/O为非阻塞模式
 * @fd: 文件描符符
@@ -200,7 +207,34 @@ int TcpSocket::setBlock(int fd)
 */
 int TcpSocket::readTimeout(unsigned int waitSeconds)
 {
+	int ret = 0;
+	if (waitSeconds > 0) {
+		fd_set read_fdset;
+		struct timeval timeout;
 
+		FD_ZERO(&read_fdset);
+		FD_SET(m_socket, &read_fdset);
+		timeout.tv_sec = waitSeconds;
+		timeout.tv_usec = 0;
+
+		/*
+			select函数的返回值有三种情况：
+			1、若timeout时间到（超时），没有检测到读事件，返回0
+			2、若ret < 0 && errno == EINTR 说明被信号中断
+			3、若ret > 0 表示有读事件发生，返回的是发生事件fd的个数
+		*/
+		do {
+			ret = select(m_socket + 1, &read_fdset, nullptr, nullptr, &timeout);
+		} while (ret < 0 && errno == EINTR);
+		if (ret == 0) {
+			ret = -1;
+			errno = ETIMEDOUT;
+		}
+		else if (ret == 1) {
+			ret = 0;
+		}
+	}
+	return ret;
 }
 
 /*
@@ -252,6 +286,7 @@ int TcpSocket::connectTimeout(struct sockaddr_in* addr, unsigned int waitSeconds
 		/* 以非阻塞方式连接返回EINPROGRESS, 表示连接还在进行中 */
 		fd_set connect_fdset;
 		struct timeval timeout;
+
 		FD_ZERO(&connect_fdset);
 		FD_SET(m_socket, &connect_fdset);
 		timeout.tv_sec = waitSeconds;
@@ -310,7 +345,24 @@ int TcpSocket::connectTimeout(struct sockaddr_in* addr, unsigned int waitSeconds
 */
 int TcpSocket::readn(void* buf, int count)
 {
-	
+	size_t nleft = count;
+	ssize_t nread;
+	char* bufp = (char*)buf;
+
+	while (nleft > 0) {
+		if ((nread = read(m_socket, bufp, nleft)) < 0) {
+			if (errno == EINTR || errno == EAGAIN) {
+				continue;
+			}
+			return -1;
+		}
+		else if (nread == 0) {
+			return count - nleft;
+		}
+		bufp += nread;
+		nleft -= nread;
+	}
+	return count;
 }
 
 /*
@@ -327,7 +379,7 @@ int TcpSocket::writen(const void* buf, int count)
 
 	while (nleft > 0) {
 		if ((nwritten = write(m_socket, bufp, nleft)) < 0) {
-			if (errno == EINTR) {	/* 被信号打断 */
+			if (errno == EINTR || errno == EAGAIN) {	/* 被信号打断 */
 				continue;
 			}
 			return -1;
