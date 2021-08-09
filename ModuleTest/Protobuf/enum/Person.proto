@@ -1,0 +1,21 @@
+// protobuf的版本
+syntax = 'proto3';
+// 组织Person结构体
+// 语法格式： message 关键字（相当于被创建出来的类的名字）
+enum Color
+{
+	Red = 0;	// protobuf中的起始枚举值必须为0
+	Green = 6;
+	Blue = 9;
+}
+
+message Person
+{
+	// 成员变量
+	// 数据类型 变量名 = 变量的编号（编号从1开始）
+	int32 id = 1;
+	string name =2;	// 当字符串中含有中文时，应该用bytes
+	string sex = 3;
+	int32 age = 4;
+	Color color = 5;
+}
