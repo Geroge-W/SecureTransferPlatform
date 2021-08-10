@@ -1,1 +1,1 @@
-# secure_transmission_platform
+	本项目是本人在系统地学习完Linux系统编程和网络编程后，检验自己学习成果的作品，在未来一个月将会持续更新，敬请期待~
