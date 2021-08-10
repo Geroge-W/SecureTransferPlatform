@@ -6,6 +6,7 @@
  ************************************************************************/
 
 #include <iostream>
+#include <cstdio>
 #include <cstring>
 #include "SecKeyShm.h"
 using namespace std;
@@ -82,5 +83,41 @@ int SecKeyShm::shmWrite(ShmNodeInfo* pNodeInfo)
 
 ShmNodeInfo SecKeyShm::shmRead(string clientID, string serverID)
 {
-
+	int ret = 0;
+	/* 关联共享内存 */
+	ShmNodeInfo* pAddr = nullptr;
+	pAddr = static_cast<ShmNodeInfo*>(mapShm());
+	if (pAddr == nullptr) {
+		fprintf(stderr, "mapShm error\n");
+		return ShmNodeInfo();
+	}
+	/* 遍历网点信息 */
+	int i = 0;
+	ShmNodeInfo info;
+	ShmNodeInfo* pNode = nullptr;
+	/* 通过clientID和serverID查找节点 */
+	cout << "maxNode: " << m_maxNode << endl;
+	for (i = 0; i < m_maxNode; ++i) {
+		pNode = pAddr + i;
+		/* Dubug输出 */
+		cout << i << endl;
+		cout << "clientID compare: " << pNode->clientID << " - " << clientID << endl;
+		cout << "serverID compare: " << pNode->serverID << " - " << serverID << endl;
+		cout << endl;
+		if (strcmp(pNode->clientID, clientID.c_str()) == 0 &&
+			strcmp(pNode->serverID, serverID.c_str()) == 0)
+		{
+			/* 找到节点信息，拷贝到传出参数 */
+			info = *pNode;
+			/* Debug输出 */
+			cout << "++++++++++++++" << endl;
+			cout << info.clientID << " , " << info.serverID << ", "
+				<< info.secKeyID << ", " << info.status << ", "
+				<< info.secKey << endl;
+			cout << "===============" << endl;
+			break;
+		}
+	}
+	unmapShm();
+	return info;
 }
