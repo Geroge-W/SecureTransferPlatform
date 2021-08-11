@@ -21,7 +21,7 @@ BaseShm::BaseShm(int key)
 
 BaseShm::BaseShm(int key, int size)
 {
-	getShmID(key, size, IPC_CREAT | IPC_EXCL | 0664);
+	getShmID(key, size, IPC_CREAT | 0664);
 }
 
 BaseShm::BaseShm(string name)
@@ -33,7 +33,7 @@ BaseShm::BaseShm(string name)
 BaseShm::BaseShm(string name, int size)
 {
 	key_t key = ftok(name.c_str(), RandX);
-	getShmID(key, size, IPC_CREAT | IPC_EXCL | 0664);
+	getShmID(key, size, IPC_CREAT | 0664);
 }
 
 void* BaseShm::mapShm()
@@ -65,6 +65,7 @@ int BaseShm::getShmID(key_t key, int shmSize, int flag)
 {
 	cout << "share memory size: " << shmSize << endl;
 	m_shmID = shmget(key, shmSize, flag);
+	cout << "m_shmID = " << m_shmID << endl;
 	if (m_shmID == -1 && errno != EEXIST) {
 		perror("shmget error");
 	}	
