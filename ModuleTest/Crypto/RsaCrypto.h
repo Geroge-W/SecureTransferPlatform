@@ -27,6 +27,7 @@ class RsaCrypto
 {
 public:
 	RsaCrypto();
+	/* 根据已有的私钥和公钥文件来初始化 */
 	RsaCrypto(string fileName, bool isPrivate = true);
 	~RsaCrypto();
 
@@ -39,7 +40,7 @@ public:
 	/* 对数据进行数字签名 */
 	string sign(string data, SignLevel level = Level3);
 	/* 签名校验 */
-	bool signVerify(string data, string signData, SignLevel = Level3);
+	bool signVerify(string data, string signData, SignLevel level = Level3);
 
 private:
 	/* 获取公钥 */
