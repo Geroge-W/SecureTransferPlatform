@@ -2,7 +2,7 @@ DIR_INC = ./include
 DIR_SRC = ./src
 DIR_OBJ = ./obj
 DIR_BIN = ./bin
-TARGET = SecKeyClient
+TARGET = SecKeyServer
 BIN_TARGET = $(DIR_BIN)/$(TARGET)
 
 SRCS = $(wildcard $(DIR_SRC)/*)

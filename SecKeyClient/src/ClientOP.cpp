@@ -48,7 +48,7 @@ ClientOP::~ClientOP()
 int ClientOP::showMenu()
 {
 	int nSel = -1;
-	printf("\n  /*************************欢迎登陆密钥协商安全传输平台**************************/");
+	printf("\n  /*************************欢迎登陆密钥协商安全传输平台*************************/");
 	printf("\n  /******************************************************************************/");
 	printf("\n  /*                                 1.密钥协商                                 */");
 	printf("\n  /*                                 2.密钥校验                                 */");
@@ -81,6 +81,9 @@ bool ClientOP::secKeyConsult()
 	reqInfo.serverID = m_info.serverID;
 	reqInfo.cmdType = 1;	/* 秘钥协商 */
 	reqInfo.data = ss.str();
+
+	cout << "The RSA public key is:\n" << reqInfo.data << endl;
+
 	/* 对原始数据进行数字签名 */
 	Hash hash(T_SHA224);
 	hash.addData(reqInfo.data);

@@ -196,14 +196,14 @@ class RespondMsg :
   std::string* release_serverid();
   void set_allocated_serverid(std::string* serverid);
 
-  // string data = 5;
+  // bytes data = 5;
   void clear_data();
   static const int kDataFieldNumber = 5;
   const std::string& data() const;
   void set_data(const std::string& value);
   void set_data(std::string&& value);
   void set_data(const char* value);
-  void set_data(const char* value, size_t size);
+  void set_data(const void* value, size_t size);
   std::string* mutable_data();
   std::string* release_data();
   void set_allocated_data(std::string* data);
@@ -374,7 +374,7 @@ inline void RespondMsg::set_allocated_serverid(std::string* serverid) {
   // @@protoc_insertion_point(field_set_allocated:RespondMsg.serverID)
 }
 
-// string data = 5;
+// bytes data = 5;
 inline void RespondMsg::clear_data() {
   data_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
@@ -399,7 +399,7 @@ inline void RespondMsg::set_data(const char* value) {
   data_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:RespondMsg.data)
 }
-inline void RespondMsg::set_data(const char* value, size_t size) {
+inline void RespondMsg::set_data(const void* value, size_t size) {
   
   data_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));

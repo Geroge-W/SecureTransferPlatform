@@ -26,10 +26,12 @@ int main()
 		case 3:
 			op.secKeyCancel();
 			break;
+		case 0:
+			cout << "  Bye!" << endl;
+			exit(0);
 		default:
 			break;
 		}
 	}
-	cout << "Bye!" << endl;
 	exit(0);
 }
