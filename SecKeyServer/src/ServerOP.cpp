@@ -78,7 +78,7 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	/* 校验数字签名 */
 	Hash hash(T_SHA224);
 	hash.addData(reqMsg->data());
-	bool checkRet = rsa.signVerify(hash.getResult(), reqMsg->data());
+	bool checkRet = rsa.signVerify(hash.getResult(), reqMsg->sign());
 	if (!checkRet)
 	{
 		info.status = 0;
