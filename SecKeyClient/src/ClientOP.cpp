@@ -122,9 +122,9 @@ bool ClientOP::secKeyConsult()
 	}
 
 	/* 将得到的服务器发来的密文解密 */
-	string pubKey = rsa.priKeyDecrypt(resData->data());
-	cout << "The public key for symmetric encryption is: " << endl;
-	cout << pubKey << endl;
+	string aesPubKey = rsa.priKeyDecrypt(resData->data());
+	cout << "The public key for AES encryption is: " << endl;
+	cout << aesPubKey << endl;
 	delete factory;
 	delete codec;
 

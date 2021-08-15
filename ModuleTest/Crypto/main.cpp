@@ -77,9 +77,9 @@ static void aesTest()
 
 int main()
 {
-	// hashTest();
-	// rsaTest();
-	aesTest();
+	//hashTest();
+	rsaTest();
+	// aesTest();
 
 	return 0;
 }

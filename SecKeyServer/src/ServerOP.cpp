@@ -70,9 +70,7 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 {
 	/* 将从客户端发来的RSA公钥写入本地磁盘 */
 	ofstream ofs("public.pem");
-	cout << "11111111\n" << reqMsg->data() << endl;
 	ofs << reqMsg->data();
-	cout << "22222222" << endl;
 	ofs.close();
 
 	RespondInfo info;
@@ -107,6 +105,9 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	CodecFactory *factory = new RespondFactory(&info);
 	Codec *codec = factory->createCodec();
 	string encMsg = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
 	return encMsg;
 }
 
@@ -152,9 +153,6 @@ void *ServerOP::workHard(void *arg)
 	RequestMsg *reqMsg = (RequestMsg *)codec->decodeMsg();
 	cout << "The RSA_public_key from client is: " << endl;
 	cout << reqMsg->data() << endl;
-	/* 释放资源 */
-	delete factory;
-	delete codec;
 	/* 根据接收数据中cmdType的值，作出相应动作 */
 	string data = string();
 	switch (reqMsg->cmdtype())
@@ -172,6 +170,10 @@ void *ServerOP::workHard(void *arg)
 	default:
 		break;
 	}
+	/* 释放资源 */
+	delete factory;
+	delete codec;
+
 	socket->sendMsg(data);
 	socket->disConnect();
 	op->m_list.erase(pthread_self());
