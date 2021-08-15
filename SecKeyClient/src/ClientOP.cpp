@@ -114,7 +114,7 @@ bool ClientOP::secKeyConsult()
 	factory = new RespondFactory(recvMsg);
 	codec = factory->createCodec();
 	RespondMsg* resData = (RespondMsg*)codec->decodeMsg();	/* 反序列化 */
-	if (!resData->status()) {
+	if (resData->status() == 0) {
 		cout << "Secret Key consult failed" << endl;
 		delete factory;
 		delete codec;

@@ -93,7 +93,6 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 
 		/* 通过客户端发来的RSA公钥对AES秘钥进行加密 */
 		string secAesKey = rsa.pubKeyEncrypt(AesKey);
-		cout << "the AES_KEY after Encrypted is: " << secAesKey << endl;
 
 		/* 填充服务器的应答数据 */
 		info.clientID = reqMsg->clientid();
