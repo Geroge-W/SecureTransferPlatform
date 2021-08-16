@@ -85,7 +85,7 @@ bool ClientOP::secKeyConsult()
 	cout << "The RSA public key is:\n" << reqInfo.data << endl;
 
 	/* 对原始数据进行数字签名 */
-	Hash hash(T_SHA224);
+	Hash hash(T_SHA1);
 	hash.addData(reqInfo.data);
 	reqInfo.sign = rsa.sign(hash.getResult());	/* 对公钥的哈希值进行签名 */
 

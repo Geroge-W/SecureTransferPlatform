@@ -76,7 +76,7 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	RespondInfo info;
 	RsaCrypto rsa("public.pem", false);
 	/* 校验数字签名 */
-	Hash hash(T_SHA224);
+	Hash hash(T_SHA1);
 	hash.addData(reqMsg->data());
 	bool checkRet = rsa.signVerify(hash.getResult(), reqMsg->sign());
 	if (!checkRet)

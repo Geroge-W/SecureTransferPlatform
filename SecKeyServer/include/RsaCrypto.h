@@ -31,6 +31,8 @@ public:
 	RsaCrypto(string fileName, bool isPrivate = true);
 	~RsaCrypto();
 
+	/* 将公钥/私钥字符串数据解析到RSA对象中 */
+	void parseKeyString(string keyStr, bool isPrivate = true);
 	/* 使用RSA算法生成秘钥对 */
 	void generateKeyPair(int bits, string pub = "public.pem", string pri = "private.pem");
 	/* 使用公钥加密 */
@@ -47,6 +49,10 @@ private:
 	bool initPublicKey(string pubFile);
 	/* 获取私钥 */
 	bool initPrivateKey(string priFile);
+	/* Base64编码 */
+	string toBase64(const char* str, int len);
+	/* Base64解码 */
+	char* fromBase64(string str);
 
 private:
 	/* 公钥 */
