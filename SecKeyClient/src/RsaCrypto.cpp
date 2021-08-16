@@ -127,6 +127,7 @@ string RsaCrypto::sign(string data, SignLevel level)
 	RSA_sign(level, (unsigned char*)data.c_str(), data.size(), (unsigned char*)signBuf, 
 		&len, m_privateKey);
 	cout << "sign length: " << len << endl;
+	/* 注意，签名数据需使用Base64进行编码，以保证在网络传输中不会出错 */
 	string result = toBase64(signBuf, len);
 	delete [] signBuf;
 	return result;
