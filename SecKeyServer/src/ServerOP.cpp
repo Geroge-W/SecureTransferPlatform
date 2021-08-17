@@ -177,5 +177,6 @@ void *ServerOP::workHard(void *arg)
 	socket->disConnect();
 	op->m_list.erase(pthread_self());
 
+
 	pthread_exit(0);
 }
