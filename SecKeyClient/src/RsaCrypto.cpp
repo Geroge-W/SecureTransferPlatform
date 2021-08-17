@@ -94,7 +94,10 @@ string RsaCrypto::pubKeyEncrypt(string data)
 		(unsigned char*)encode, m_publicKey, RSA_PKCS1_PADDING);
 	string result = string();
 	if (ret >= 0) {
-		result = string(encode, ret);
+		cout << "data encrypt success" << endl;
+		result = toBase64(encode, ret);
+	} else {
+		ERR_print_errors_fp(stdout);
 	}
 	/* 释放资源 */
 	delete [] encode;
@@ -103,20 +106,26 @@ string RsaCrypto::pubKeyEncrypt(string data)
 
 string RsaCrypto::priKeyDecrypt(string encData)
 {
+	/* Base64解密 */
+	char* text = fromBase64(encData);
 	/* 计算私钥长度 */
 	int keyLen = RSA_size(m_privateKey);
 	cout << "private key length: " << keyLen << endl;
 	/* 申请内存空间 */
 	char* decode = new char[keyLen + 1];
 	/* 使用私钥解密 */
-	int ret = RSA_private_decrypt(encData.size(), (unsigned char*)encData.c_str(), 
+	int ret = RSA_private_decrypt(keyLen, (unsigned char*)text, 
 	(unsigned char*)decode, m_privateKey, RSA_PKCS1_PADDING);
 	string result = string();
 	if (ret >= 0) {
 		result = string(decode, ret);
+	} else {
+		cout << "private decrypt fail" << endl;
+		ERR_print_errors_fp(stdout);
 	}
 	/* 释放资源 */
 	delete [] decode;
+	delete [] text;
 	return result;
 }
 
@@ -127,7 +136,6 @@ string RsaCrypto::sign(string data, SignLevel level)
 	RSA_sign(level, (unsigned char*)data.c_str(), data.size(), (unsigned char*)signBuf, 
 		&len, m_privateKey);
 	cout << "sign length: " << len << endl;
-	/* 注意，签名数据需使用Base64进行编码，以保证在网络传输中不会出错 */
 	string result = toBase64(signBuf, len);
 	delete [] signBuf;
 	return result;
