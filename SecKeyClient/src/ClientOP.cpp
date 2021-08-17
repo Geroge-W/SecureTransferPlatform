@@ -16,6 +16,7 @@
 #include "RequestFactory.h"
 #include "RequestMsg.pb.h"
 #include "RsaCrypto.h"
+#include "SecKeyShm.h"
 #include "TcpSocket.h"
 #include "RespondCodec.h"
 #include "RespondFactory.h"
@@ -31,7 +32,7 @@ ClientOP::ClientOP(string jsonFile)
 	Value root;
 	if (r.parse(ifs, root) == false) {
 		cout << "Json file init error" << endl;
-		exit(1);
+		throw exception();
 	}
 
 	/* 根据解析出的Value对象，配置客户端参数 */
@@ -39,10 +40,23 @@ ClientOP::ClientOP(string jsonFile)
 	m_info.clientID = root["ClientID"].asString();
 	m_info.serverIP = root["ServerIP"].asString();
 	m_info.serverPort = root["ServerPort"].asUInt();
+
+	/* 实例化出共享内存对象 */
+	string shmKey = root["ShmKey"].asString();
+	int maxNode = root["ShmMaxNode"].asInt();
+	m_shm = new SecKeyShm(shmKey, maxNode);
+	if (m_shm == nullptr) {
+		cout << "SecKeyShm init error" << endl;
+		throw exception();
+	}
 }
 
 ClientOP::~ClientOP()
 {
+	if (m_shm != nullptr) {
+		delete m_shm;
+		m_shm = nullptr;
+	}
 }
 
 int ClientOP::showMenu()
@@ -125,6 +139,16 @@ bool ClientOP::secKeyConsult()
 	string aesPubKey = rsa.priKeyDecrypt(resData->data());
 	cout << "The public key for AES encryption is: " << endl;
 	cout << aesPubKey << endl;
+
+	/* 将秘钥写入到共享内存中 */
+	ShmNodeInfo shmInfo;
+	strcpy(shmInfo.clientID, m_info.clientID.c_str());
+	strcpy(shmInfo.serverID, m_info.serverID.c_str());
+	strcpy(shmInfo.secKey, aesPubKey.c_str());
+	shmInfo.secKeyID = resData->seckeyid();
+	shmInfo.status = 1;
+	m_shm->shmWrite(&shmInfo);
+
 	delete factory;
 	delete codec;
 

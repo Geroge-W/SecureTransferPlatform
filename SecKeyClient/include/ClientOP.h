@@ -7,6 +7,7 @@
 
 #pragma once
 #include <iostream>
+#include "SecKeyShm.h"
 using namespace std;
 
 struct ClientInfo
@@ -21,6 +22,7 @@ class ClientOP
 {
 private:
 	ClientInfo m_info;
+	SecKeyShm* m_shm;
 
 public:
 	/* 通过解析json文件配置客户端参数 */
