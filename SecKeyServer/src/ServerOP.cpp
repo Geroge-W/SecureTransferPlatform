@@ -114,23 +114,23 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 string ServerOP::generateAesKey(int keyLen)
 { 
 	srand((unsigned int)(time(nullptr)));
-	string randString(keyLen, '0');
-	char randBuf[] = "~!@#$&*()+-=?";
-	for (int i = 0; i < randString.length(); ++i) {
+	string randString = string();
+	char randBuf[] = "~!@#$%^&*()_+}{|\';[]";
+	for (int i = 0; i < keyLen; ++i) {
 		int idx = rand() % 4;
 		switch (idx)
 		{
 		case 0:
-			randString[i] = rand() % 10 + '0';
+			randString.push_back(rand() % 10 + '0');
 			break;
 		case 1:
-			randString[i] = rand() % 26 + 'a';
+			randString.push_back(rand() % 26 + 'a');
 			break;
 		case 2:
-			randString[i] = rand() % 26 + 'A';
+			randString.push_back(rand() % 26 + 'A');
 			break;
 		case 3:
-			randString[i] = randBuf[rand() % strlen(randBuf)];
+			randString.push_back(randBuf[rand() % strlen(randBuf)]);
 			break;
 		default:
 			break;
