@@ -60,9 +60,10 @@ void ServerOP::startServer()
 		}
 		cout << "SecKeyClient connection succeeds..." << endl;
 		/* 建立连接后，业务逻辑交给工作线程处理 */
+		ThreadArg* arg = new ThreadArg(this, socket);
 		pthread_t tid;
-		pthread_create(&tid, nullptr, workHard, this);
-		m_list.emplace(tid, socket);
+		pthread_create(&tid, nullptr, workHard, arg);
+		pthread_detach(tid);
 	}
 }
 
@@ -140,11 +141,11 @@ string ServerOP::generateAesKey(int keyLen)
 
 void *ServerOP::workHard(void *arg)
 {
-	sleep(1);
-	/* 通过参数将传递的this指针转换 */
-	ServerOP *op = (ServerOP *)arg;
+	/* 通过参数将传递的ThreadArg转换 */
+	ThreadArg* targ = (ThreadArg*)arg;
+	ServerOP *op = targ->sop;
 	/* 接收客户端数据 */
-	TcpSocket *socket = op->m_list[pthread_self()];
+	TcpSocket *socket = targ->socket;
 	string msg = socket->recvMsg();
 	/* 将接收到的数据反序列化 */
 	CodecFactory *factory = new RequestFactory(msg);
@@ -169,14 +170,14 @@ void *ServerOP::workHard(void *arg)
 	default:
 		break;
 	}
-	/* 释放资源 */
-	delete factory;
-	delete codec;
 
 	socket->sendMsg(data);
 	socket->disConnect();
-	op->m_list.erase(pthread_self());
-
+	/* 释放资源 */
+	delete factory;
+	delete codec;
+	delete socket;
+	delete targ;
 
 	pthread_exit(0);
 }

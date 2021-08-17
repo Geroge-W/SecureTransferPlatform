@@ -35,6 +35,12 @@ private:
 	string m_serverID;
 	/* 服务器监听端口号 */
 	unsigned short m_port;
-	/* 维护每个工作线程所对应的通信对象 */
-	unordered_map<pthread_t, TcpSocket*> m_list;
+};
+
+/* 主线程向工作线程传递的参数 */
+struct ThreadArg
+{
+	ThreadArg(ServerOP* op, TcpSocket* sock): sop(op), socket(sock){};
+	ServerOP* sop;
+	TcpSocket* socket;
 };
