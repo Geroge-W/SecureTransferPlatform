@@ -1,8 +1,8 @@
-DIR_INC = ./include
-DIR_SRC = ./src
-DIR_OBJ = ./obj
-DIR_BIN = ./bin
-TARGET = SecKeyServer
+DIR_INC = ./
+DIR_SRC = ./
+DIR_OBJ = ./
+DIR_BIN = ./
+TARGET = test
 BIN_TARGET = $(DIR_BIN)/$(TARGET)
 
 SRCS = $(wildcard $(DIR_SRC)/*)
@@ -10,7 +10,7 @@ OBJS_1 = $(patsubst %.cpp, $(DIR_OBJ)/%.o, $(filter %.cpp, $(notdir $(SRCS))))
 OBJS_2 = $(patsubst %.cc, $(DIR_OBJ)/%.o, $(filter %.cc, $(notdir $(SRCS))))
 
 CC = g++
-CFLAGS = -Wall -g -I$(DIR_INC) -std=c++11 -lpthread -lprotobuf -ljson -lcrypto -lmysqlclient
+CFLAGS = -Wall -g -I$(DIR_INC) -std=c++11 -lmysqlclient
 
 ALL:$(BIN_TARGET)
 

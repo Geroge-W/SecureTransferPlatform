@@ -20,6 +20,7 @@
 #include "RespondMsg.pb.h"
 #include "RespondFactory.h"
 #include "RequestFactory.h"
+#include "ShmNodeInfo.h"
 using namespace std;
 using namespace Json;
 
@@ -29,17 +30,28 @@ ServerOP::ServerOP(string json)
 	ifstream ifs(json);
 	Reader r;
 	Value root;
-	if (!r.parse(ifs, root))
+	if (r.parse(ifs, root) == false)
 	{
 		cout << "Json file init error" << endl;
 		exit(1);
 	}
 	m_serverID = root["ServerID"].asString();
 	m_port = root["Port"].asUInt();
+	m_dbUser = root["UserDB"].asString();
+	m_dbPwd = root["PwdDB"].asString();
+	m_dbName = root["NameDB"].asString();
+	/* 初始化与数据库的连接 */
+	bool ret = m_mysql.connectDB("127.0.0.1", m_dbUser, m_dbPwd, m_dbName);
+	if (ret == false) {
+		cout << "database init error" << endl;
+		exit(1);
+	}
+
 }
 
 ServerOP::~ServerOP()
 {
+	m_mysql.closeDB();
 }
 
 void ServerOP::startServer()
@@ -80,7 +92,7 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	Hash hash(T_SHA1);
 	hash.addData(reqMsg->data());
 	bool checkRet = rsa.signVerify(hash.getResult(), reqMsg->sign());
-	if (!checkRet)
+	if (checkRet == false)
 	{
 		info.status = 0;
 		cout << "Sign verify failed" << endl;
@@ -89,17 +101,38 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	{
 		cout << "Sign verify succeed" << endl;
 		/* 生成随机字符串作为AES加密算法的秘钥, 秘钥可选长度为16, 24, 32bytes */
-		string AesKey = generateAesKey(16);
+		string AesKey = generateAesKey(Len32);
 		cout << "the AES_KEY is: " << AesKey << endl;
 
 		/* 通过客户端发来的RSA公钥对AES秘钥进行加密 */
 		string secAesKey = rsa.pubKeyEncrypt(AesKey);
 
+		/* 将生成的AES秘钥信息写入到数据库中 */
+		ShmNodeInfo node;
+		strcpy(node.clientID, reqMsg->clientid().c_str());
+		strcpy(node.serverID, reqMsg->serverid().c_str());
+		strcpy(node.secKey, AesKey.c_str());	
+		node.secKeyID = m_mysql.getSecKeyID();
+		node.status = 1;
+		bool ret = m_mysql.writeSecKey(&node);
+		if (ret == true) {
+			/* 节点可用 */
+			info.status = 1;
+			/* 更新密钥ID */
+			m_mysql.updateSecKeyID(node.secKeyID + 1);
+			/* 写入共享内存 */
+			
+		}
+		else {
+			/* 节点不可用 */
+			info.status = 0;
+		}
+
 		/* 填充服务器的应答数据 */
 		info.clientID = reqMsg->clientid();
 		info.serverID = reqMsg->serverid();
 		info.data = secAesKey;
-		info.status = 1;
+		info.secKeyID = node.secKeyID;
 	}
 	/* 将要向客户端发送的数据序列化, 然后发送之 */
 	CodecFactory *factory = new RespondFactory(&info);
@@ -111,11 +144,11 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	return encMsg;
 }
 
-string ServerOP::generateAesKey(int keyLen)
+string ServerOP::generateAesKey(KeyLen keyLen)
 { 
 	srand((unsigned int)(time(nullptr)));
 	string randString = string();
-	char randBuf[] = "~!@#$%^&*()_+}{|\';[]";
+	char randBuf[] = "~!@#$%^&*()_+}{|;[]";
 	for (int i = 0; i < keyLen; ++i) {
 		int idx = rand() % 4;
 		switch (idx)

@@ -1,4 +1,7 @@
 {
-	"ServerID": "0001", 
-	"Port": 9999
+	"ServerID": "1002",
+	"Port": 9999,
+	"UserDB": "root",
+	"PwdDB": "Lbw_13999231708",
+	"NameDB": "platform_data"
 }
