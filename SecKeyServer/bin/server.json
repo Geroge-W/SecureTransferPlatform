@@ -3,5 +3,7 @@
 	"Port": 9999,
 	"UserDB": "root",
 	"PwdDB": "Lbw_13999231708",
-	"NameDB": "platform_data"
+	"NameDB": "platform_data",
+	"ShmKey": "/usr/lib",
+	"ShmMaxNode": 10
 }

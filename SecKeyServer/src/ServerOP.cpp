@@ -40,10 +40,20 @@ ServerOP::ServerOP(string json)
 	m_dbUser = root["UserDB"].asString();
 	m_dbPwd = root["PwdDB"].asString();
 	m_dbName = root["NameDB"].asString();
+
 	/* 初始化与数据库的连接 */
 	bool ret = m_mysql.connectDB("127.0.0.1", m_dbUser, m_dbPwd, m_dbName);
 	if (ret == false) {
 		cout << "database init error" << endl;
+		exit(1);
+	}
+
+	/* 初始化共享内存 */
+	string shmKey = root["ShmKey"].asString();
+	int maxNode = root["ShmMaxNode"].asUInt();
+	m_shm = new SecKeyShm(shmKey, maxNode);
+	if (m_shm == nullptr) {
+		cout << "share memory init error" << endl;
 		exit(1);
 	}
 
@@ -52,6 +62,10 @@ ServerOP::ServerOP(string json)
 ServerOP::~ServerOP()
 {
 	m_mysql.closeDB();
+	if (m_shm != nullptr) {
+		delete m_shm;
+		m_shm = nullptr;
+	}
 }
 
 void ServerOP::startServer()
@@ -121,7 +135,7 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 			/* 更新密钥ID */
 			m_mysql.updateSecKeyID(node.secKeyID + 1);
 			/* 写入共享内存 */
-			
+			m_shm->shmWrite(&node);	
 		}
 		else {
 			/* 节点不可用 */

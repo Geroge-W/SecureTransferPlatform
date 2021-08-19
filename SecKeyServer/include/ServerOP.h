@@ -9,6 +9,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <pthread.h>
+#include <SecKeyShm.h>
 #include "RequestMsg.pb.h"
 #include "TcpSocket.h"
 #include "MySQLOP.h"
@@ -46,8 +47,8 @@ private:
 	string m_dbName;
 	/* 数据库实例对象 */
 	MySQLOP m_mysql;
-
-
+	/* 共享内存操作 */
+	SecKeyShm* m_shm;
 };
 
 /* 主线程向工作线程传递的参数 */
