@@ -8,7 +8,10 @@
 #include <iostream>
 #include <pthread.h>
 #include "TcpServer.h"
+#include "Interface.h"
 using namespace std;
+
+static Interface inter("server.json");
 
 static void* callback(void* arg)
 {
@@ -19,9 +22,11 @@ static void* callback(void* arg)
 		if (msg.empty()) {
 			break;
 		}
+		msg = inter.decryptData(msg);
 		cout << "recvive message: " << msg << endl;
 		/* 发送数据 */
 		string sendMsg = "Are you OK?";
+		sendMsg = inter.encryptData(sendMsg);
 		sockTcp->sendMsg(sendMsg);
 	}
 	sockTcp->disConnect();
@@ -34,7 +39,7 @@ int main()
 	/* 创建对象 */
 	TcpServer* server = new TcpServer;
 	/* 设置监听 */
-	server->setListen(9999);
+	server->setListen(8888);
 	/* 等待并接受连接请求 */
 	while (true) {
 		cout << "accept wait..." << endl;

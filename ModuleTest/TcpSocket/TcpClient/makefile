@@ -2,7 +2,7 @@ CC=g++
 SRCS=$(wildcard *.cpp)
 OBJS=$(patsubst %.cpp, %.o, $(SRCS))
 TARGET=TcpClient
-CFLAGS=-Wall -lpthread
+CFLAGS=-Wall -L /home/lbw/projects/secure_platform/Interface/lib -lpthread -linterface
 
 ALL:$(TARGET)
 %.o:%.cpp

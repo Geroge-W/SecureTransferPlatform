@@ -2,7 +2,7 @@ CC=g++
 SRCS=$(wildcard *.cpp)
 OBJS=$(patsubst %.cpp, %.o, $(SRCS))
 TARGET=TcpServer
-CFLAGS=-Wall -lpthread
+CFLAGS=-Wall -lpthread -linterface 
 
 ALL:$(TARGET)
 %.o:%.cpp

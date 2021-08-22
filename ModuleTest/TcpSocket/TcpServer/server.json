@@ -1,0 +1,6 @@
+{
+    "ShmKey": "/usr/lib", 
+    "ServerID": "1002", 
+    "ClientID": "1001", 
+    "MaxNode": 10
+}

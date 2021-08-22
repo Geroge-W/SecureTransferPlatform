@@ -7,7 +7,7 @@ RANLIB  = ranlib
 TAR_GET = libinterface.a
 SOTAR_GET = libinterface.so
 SRC = $(wildcard ${DIR_SRC}/*.cpp)  
-OBJ = $(patsubst %.cpp,${DIR_OBJ}/%.o,$(notdir ${SRC})) 
+OBJ = $(patsubst %.cpp,${DIR_OBJ}/%.o,$(notdir ${SRC}))
 
 LIB_TARGET = ${DIR_BIN}/${TAR_GET}
 LIBSO_TARGET = $(DIR_BIN)/${SOTAR_GET}
