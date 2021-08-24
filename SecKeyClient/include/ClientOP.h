@@ -37,5 +37,7 @@ public:
 	void secKeyCheck();
 	/* 秘钥注销 */
 	void secKeyCancel();
+	/* 秘钥查看 */
+	void secKeyView();
 
 };

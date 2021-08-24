@@ -95,6 +95,9 @@ void ServerOP::startServer()
 
 string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 {
+	cout << "The RSA_public_key from client is: " << endl;
+	cout << reqMsg->data() << endl;
+
 	/* 将从客户端发来的RSA公钥写入本地磁盘 */
 	ofstream ofs("public.pem");
 	ofs << reqMsg->data();
@@ -158,6 +161,66 @@ string ServerOP::secKeyConsult(RequestMsg *reqMsg)
 	return encMsg;
 }
 
+string ServerOP::secKeyCheck(RequestMsg* reqMsg)
+{
+	/* 组织向客户端发送的数据 */
+	RespondInfo info;
+	info.clientID = reqMsg->clientid();
+	info.serverID = m_serverID;
+	info.secKeyID = -1;
+	info.data = string();
+
+	/* 获取客户端发送的数据—>秘钥的哈希值 */
+	string hashData = reqMsg->data();
+
+	/* 从本地共享内存中读取出秘钥 */
+	ShmNodeInfo nodeInfo = m_shm->shmRead(reqMsg->clientid(), m_serverID);
+	if (nodeInfo.status == 0) {
+		info.status = 0;
+		cout << "No SecKeyInfo in share memory" << endl;
+	}
+	else {
+		cout << "The SecKey read from share memory is: " << endl;
+		cout << nodeInfo.secKey << endl;
+
+		/* 对本地秘钥同样进行哈希运算 */
+		Hash hash(T_SHA1);
+		hash.addData(string(nodeInfo.secKey));
+		string localData = hash.getResult();
+
+		/* 比较两个哈希值 */
+		cout << localData << endl;
+		cout << localData.length() << endl;
+		cout << hashData << endl;
+		cout << hashData.length() << endl;
+		if (localData == hashData) {
+			info.status = 1;
+			cout << "相等" << endl;
+		}
+		else {
+			info.status = 0;
+			cout << "不相等" << endl;
+		}
+	}
+	/* 将要向客户端发送的数据序列化, 然后发送之 */
+	CodecFactory *factory = new RespondFactory(&info);
+	Codec *codec = factory->createCodec();
+	string encMsg = codec->encodeMsg();
+	delete factory;
+	delete codec;
+	return encMsg;
+}
+
+string ServerOP::secKeyCancel(RequestMsg* reqMsg)
+{
+	return string();
+}
+
+string ServerOP::secKeyView(RequestMsg* reqMsg)
+{
+	return string();
+}
+
 string ServerOP::generateAesKey(KeyLen keyLen)
 { 
 	srand((unsigned int)(time(nullptr)));
@@ -198,8 +261,6 @@ void *ServerOP::workHard(void *arg)
 	CodecFactory *factory = new RequestFactory(msg);
 	Codec *codec = factory->createCodec();
 	RequestMsg *reqMsg = (RequestMsg *)codec->decodeMsg();
-	cout << "The RSA_public_key from client is: " << endl;
-	cout << reqMsg->data() << endl;
 	/* 根据接收数据中cmdType的值，作出相应动作 */
 	string data = string();
 	switch (reqMsg->cmdtype())
@@ -209,6 +270,7 @@ void *ServerOP::workHard(void *arg)
 		data = op->secKeyConsult(reqMsg);
 		break;
 	case 2:
+		data = op->secKeyCheck(reqMsg);
 		/* 秘钥校验 */
 		break;
 	case 3:

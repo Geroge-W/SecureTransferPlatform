@@ -31,6 +31,12 @@ private:
 	string generateAesKey(KeyLen len);
 	/* 秘钥协商 */
 	string secKeyConsult(RequestMsg* reqMsg);
+	/* 秘钥校验 */		
+	string secKeyCheck(RequestMsg* reqMsg);
+	/* 秘钥注销 */
+	string secKeyCancel(RequestMsg* reqMsg);
+	/* 秘钥查看 */
+	string secKeyView(RequestMsg* reqMsg);
 	/* 工作线程回调函数 */
 	static void* workHard(void* arg);
 

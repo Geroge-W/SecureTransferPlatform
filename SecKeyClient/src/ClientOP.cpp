@@ -67,6 +67,7 @@ int ClientOP::showMenu()
 	printf("\n  /*                                 1.密钥协商                                 */");
 	printf("\n  /*                                 2.密钥校验                                 */");
 	printf("\n  /*                                 3.密钥注销                                 */");
+	printf("\n  /*                                 4.密钥查看                                 */");
 	printf("\n  /*                                 0.退出系统                                 */");
 	printf("\n  /******************************************************************************/");
 	printf("\n  /******************************************************************************/");
@@ -157,10 +158,69 @@ bool ClientOP::secKeyConsult()
 
 void ClientOP::secKeyCheck()
 {
+	/* 从共享内存中读出密钥信息 */
+	ShmNodeInfo nodeInfo = m_shm->shmRead(m_info.clientID, m_info.serverID);
+	if (nodeInfo.status == 0) {
+		cout << "No SecKeyInfo in share memory" << endl;
+		return;
+	}
+	cout << "The SecKey read from share memory is: " << endl;
+	cout << nodeInfo.secKey << endl;
 
+	/* 对密钥进行哈希运算 */
+	Hash hash(T_SHA1);
+	hash.addData(string(nodeInfo.secKey));
+	string hashData = hash.getResult();
+
+	/* 准备客户端向服务端发送的数据 */
+	RequestInfo reqInfo;
+	reqInfo.cmdType = 2;	/* 秘钥校验 */
+	reqInfo.clientID = m_info.clientID;
+	reqInfo.serverID = m_info.serverID;
+	reqInfo.data = hashData;
+	reqInfo.sign = string();
+
+	/* 将数据序列化 */
+	CodecFactory* factory = new RequestFactory(&reqInfo);
+	Codec* codec = factory->createCodec();
+	string encStr = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
+	/* 与服务器进行通信，发送序列化后的数据 */
+	TcpSocket tcp;
+	cout << "ServerIP: " << m_info.serverIP << endl;
+	cout << "ServerPort: " << m_info.serverPort << endl;
+	int ret = tcp.connectToHost(m_info.serverIP, m_info.serverPort);
+	if (ret != 0) {
+		cout << "Connect to SecKeyServer error" << endl;
+		return;
+	}
+	cout << "Connect to SecKeyServer success" << endl;
+	tcp.sendMsg(encStr);
+
+	/* 等待接收服务器的回复数据，并解析之 */
+	string recvMsg = tcp.recvMsg();
+	tcp.disConnect();
+	factory = new RespondFactory(recvMsg);
+	codec = factory->createCodec();
+	RespondMsg* resData = (RespondMsg*)codec->decodeMsg();	/* 反序列化 */
+	if (resData->status() == 0) {
+		cout << "SecKey check fail" << endl;
+	}
+	else {
+		cout << "SecKey check succeed" << endl;
+	}
+	delete factory;
+	delete codec;
 }
 
 void ClientOP::secKeyCancel()
+{
+
+}
+
+void ClientOP::secKeyView()
 {
 
 }
