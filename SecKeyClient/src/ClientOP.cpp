@@ -217,7 +217,69 @@ void ClientOP::secKeyCheck()
 
 void ClientOP::secKeyCancel()
 {
+	/* 从共享内存中读出密钥信息 */
+	ShmNodeInfo nodeInfo = m_shm->shmRead(m_info.clientID, m_info.serverID);
+	if (nodeInfo.status == 0) {
+		cout << "No SecKeyInfo in share memory" << endl;
+		return;
+	}
+	cout << "The SecKey read from share memory is: " << endl;
+	cout << nodeInfo.secKey << endl;
+	cout << "Are you sure to log off the SecKey?(Yes->1, No->0)" << endl;
 
+	/* 获取用户输入 */
+	int nSel = -1;
+	scanf("%d", &nSel);
+	/* 略去用户输入的多余字符 */
+	while (getchar() != '\n');
+
+	if (nSel != 1) {
+		return;
+	}
+
+	/* 准备客户端向服务器发送的数据 */
+	RequestInfo reqInfo;
+	reqInfo.cmdType = 3;	/* 密钥注销 */
+	reqInfo.clientID = m_info.clientID;
+	reqInfo.serverID = m_info.serverID;
+	reqInfo.data = to_string(nodeInfo.secKeyID);	/* 向服务器发送该密钥的编号 */
+	reqInfo.sign = string();
+
+	/* 将数据序列化 */
+	CodecFactory* factory = new RequestFactory(&reqInfo);
+	Codec* codec = factory->createCodec();
+	string encStr = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
+	/* 与服务器进行通信，发送序列化后的数据 */
+	TcpSocket tcp;
+	cout << "ServerIP: " << m_info.serverIP << endl;
+	cout << "ServerPort: " << m_info.serverPort << endl;
+	int ret = tcp.connectToHost(m_info.serverIP, m_info.serverPort);
+	if (ret != 0) {
+		cout << "Connect to SecKeyServer error" << endl;
+		return;
+	}
+	cout << "Connect to SecKeyServer success" << endl;
+	tcp.sendMsg(encStr);
+
+	/* 等待接收服务器的回复数据，并解析之 */
+	string recvMsg = tcp.recvMsg();
+	tcp.disConnect();
+	factory = new RespondFactory(recvMsg);
+	codec = factory->createCodec();
+	RespondMsg* resData = (RespondMsg*)codec->decodeMsg();	/* 反序列化 */
+	if (resData->status() == 0) {
+		cout << "SecKey cancel fail" << endl;
+	}
+	else {
+		m_shm->delShm();
+		cout << "SecKey cancel succeed" << endl;
+	}
+
+	delete factory;
+	delete codec;
 }
 
 void ClientOP::secKeyView()

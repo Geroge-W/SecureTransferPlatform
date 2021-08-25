@@ -189,17 +189,11 @@ string ServerOP::secKeyCheck(RequestMsg* reqMsg)
 		string localData = hash.getResult();
 
 		/* 比较两个哈希值 */
-		cout << localData << endl;
-		cout << localData.length() << endl;
-		cout << hashData << endl;
-		cout << hashData.length() << endl;
 		if (localData == hashData) {
 			info.status = 1;
-			cout << "相等" << endl;
 		}
 		else {
 			info.status = 0;
-			cout << "不相等" << endl;
 		}
 	}
 	/* 将要向客户端发送的数据序列化, 然后发送之 */
@@ -213,7 +207,35 @@ string ServerOP::secKeyCheck(RequestMsg* reqMsg)
 
 string ServerOP::secKeyCancel(RequestMsg* reqMsg)
 {
-	return string();
+	/* 组织向客户端发送的数据 */
+	RespondInfo info;
+	info.clientID = reqMsg->clientid();
+	info.serverID = m_serverID;
+	info.secKeyID = stoi(reqMsg->data());
+	info.data = string();
+
+	/* 修改共享内存 */
+	string keyID = reqMsg->data();
+	ShmNodeInfo nodeInfo = m_shm->shmRead(reqMsg->clientid(), m_serverID);
+	nodeInfo.status = 0;	/* 状态标记为不可用 */
+	m_shm->shmWrite(&nodeInfo);
+
+	/* 修改数据库中的信息 */
+	bool ret = m_mysql.cancelSecKey(keyID);
+	if (ret == false) {
+		info.status = 0;
+	} else {
+		info.status = 1;
+	}
+
+	/* 将要向客户端发送的数据序列化, 然后发送之 */
+	CodecFactory *factory = new RespondFactory(&info);
+	Codec *codec = factory->createCodec();
+	string encMsg = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
+	return encMsg;
 }
 
 string ServerOP::secKeyView(RequestMsg* reqMsg)
@@ -270,11 +292,12 @@ void *ServerOP::workHard(void *arg)
 		data = op->secKeyConsult(reqMsg);
 		break;
 	case 2:
-		data = op->secKeyCheck(reqMsg);
 		/* 秘钥校验 */
+		data = op->secKeyCheck(reqMsg);
 		break;
 	case 3:
 		/* 秘钥注销 */
+		data = op->secKeyCancel(reqMsg);
 		break;
 	default:
 		break;
