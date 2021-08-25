@@ -26,6 +26,9 @@ int main()
 		case 3:
 			op.secKeyCancel();
 			break;
+		case 4:
+			op.secKeyView();
+			break;
 		case 0:
 			cout << "  Bye!" << endl;
 			exit(0);

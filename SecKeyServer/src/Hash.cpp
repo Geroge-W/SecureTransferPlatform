@@ -107,7 +107,7 @@ string Hash::md5Result()
 	for (int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, MD5_DIGEST_LENGTH * 2 + 1);
+	return string(res, MD5_DIGEST_LENGTH * 2);
 }
 
 string Hash::sha1Result()
@@ -118,7 +118,7 @@ string Hash::sha1Result()
 	for (int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, SHA_DIGEST_LENGTH * 2 + 1);
+	return string(res, SHA_DIGEST_LENGTH * 2);
 }
 
 string Hash::sha224Result()
@@ -129,7 +129,7 @@ string Hash::sha224Result()
 	for (int i = 0; i < SHA224_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, SHA224_DIGEST_LENGTH * 2 + 1);
+	return string(res, SHA224_DIGEST_LENGTH * 2);
 }
 
 string Hash::sha256Result()
@@ -140,7 +140,7 @@ string Hash::sha256Result()
 	for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, SHA256_DIGEST_LENGTH * 2 + 1);
+	return string(res, SHA256_DIGEST_LENGTH * 2);
 }
 
 string Hash::sha384Result()
@@ -151,7 +151,7 @@ string Hash::sha384Result()
 	for (int i = 0; i < SHA384_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, SHA384_DIGEST_LENGTH * 2 + 1);
+	return string(res, SHA384_DIGEST_LENGTH * 2);
 }
 
 string Hash::sha512Result()
@@ -162,5 +162,5 @@ string Hash::sha512Result()
 	for (int i = 0; i < SHA512_DIGEST_LENGTH; ++i) {
 		sprintf(&res[i * 2], "%02x", md[i]);
 	}
-	return string(res, SHA512_DIGEST_LENGTH * 2 + 1);
+	return string(res, SHA512_DIGEST_LENGTH * 2);
 }

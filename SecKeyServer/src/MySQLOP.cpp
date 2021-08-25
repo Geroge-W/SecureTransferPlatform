@@ -86,6 +86,18 @@ bool MySQLOP::writeSecKey(ShmNodeInfo* pNode)
 	return true;
 }
 
+bool MySQLOP::cancelSecKey(string secKeyID)
+{
+	string sql = "UPDATE seckeyinfo SET state = 0 WHERE keyid = " + secKeyID + ";";
+	bool ret = executeQuery(sql);
+	if (ret == false) {
+		return false;
+	}
+	mysql_free_result(m_result);
+	cout << "MySQL is OK." << endl;
+	return true;
+}
+
 void MySQLOP::closeDB()
 {
 	if (m_connection != nullptr) {
