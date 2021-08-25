@@ -240,7 +240,29 @@ string ServerOP::secKeyCancel(RequestMsg* reqMsg)
 
 string ServerOP::secKeyView(RequestMsg* reqMsg)
 {
-	return string();
+	/* 组织向客户端发送的数据 */
+	RespondInfo info;
+	info.clientID = reqMsg->clientid();
+	info.serverID = m_serverID;
+
+	/* 查找最近七天的密钥信息 */
+	bool ret = m_mysql.getLastNDaysInfo(7, info.data);	
+	if (ret == false) {
+		info.status = 0;
+	} else {
+		info.status = 1;
+	}
+	cout << "The SecKey information of the last seven days is as follows: " << endl;
+	cout << info.data << endl;
+
+	/* 将要向客户端发送的数据序列化, 然后发送之 */
+	CodecFactory *factory = new RespondFactory(&info);
+	Codec *codec = factory->createCodec();
+	string encMsg = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
+	return encMsg;
 }
 
 string ServerOP::generateAesKey(KeyLen keyLen)
@@ -298,6 +320,10 @@ void *ServerOP::workHard(void *arg)
 	case 3:
 		/* 秘钥注销 */
 		data = op->secKeyCancel(reqMsg);
+		break;
+	case 4:
+		/* 秘钥查看 */
+		data = op->secKeyView(reqMsg);
 		break;
 	default:
 		break;

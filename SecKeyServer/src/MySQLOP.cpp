@@ -98,6 +98,26 @@ bool MySQLOP::cancelSecKey(string secKeyID)
 	return true;
 }
 
+bool MySQLOP::getLastNDaysInfo(int n, string& output)
+{
+	char sql[1024] = { 0 };
+	sprintf(sql, "SELECT createtime, seckey FROM seckeyinfo WHERE date_sub(CURDATE(), INTERVAL %d DAY) < DATE(createtime);", n);
+	bool ret = executeQuery(string(sql));
+	if (ret == false) {
+		return false;
+	}
+	cout << "MySQL is OK." << endl;
+	/* 存储每行数据 */
+	output = string();
+	while ((m_row = mysql_fetch_row(m_result))) {
+		for (int i = 0; i < mysql_num_fields(m_result); ++i) {
+			output = output + string(m_row[i]) + "\t";
+		}
+		output += "\n";
+	}
+	return true;
+}
+
 void MySQLOP::closeDB()
 {
 	if (m_connection != nullptr) {

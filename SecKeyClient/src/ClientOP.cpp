@@ -284,5 +284,47 @@ void ClientOP::secKeyCancel()
 
 void ClientOP::secKeyView()
 {
+	/* 准备要发送的数据 */
+	RequestInfo reqInfo;
+	reqInfo.cmdType = 4;	/* 密钥查看 */
+	reqInfo.clientID = m_info.clientID;
+	reqInfo.serverID = m_info.serverID;
+	reqInfo.data = string();
+	reqInfo.sign = string();
 
+	/* 将数据序列化 */
+	CodecFactory* factory = new RequestFactory(&reqInfo);
+	Codec* codec = factory->createCodec();
+	string encStr = codec->encodeMsg();
+	delete factory;
+	delete codec;
+
+	/* 与服务器进行通信，发送序列化后的数据 */
+	TcpSocket tcp;
+	cout << "ServerIP: " << m_info.serverIP << endl;
+	cout << "ServerPort: " << m_info.serverPort << endl;
+	int ret = tcp.connectToHost(m_info.serverIP, m_info.serverPort);
+	if (ret != 0) {
+		cout << "Connect to SecKeyServer error" << endl;
+		return;
+	}
+	cout << "Connect to SecKeyServer success" << endl;
+	tcp.sendMsg(encStr);
+
+	/* 等待接收服务器的回复数据，并解析之 */
+	string recvMsg = tcp.recvMsg();
+	tcp.disConnect();
+	factory = new RespondFactory(recvMsg);
+	codec = factory->createCodec();
+	RespondMsg* resData = (RespondMsg*)codec->decodeMsg();	/* 反序列化 */
+	if (resData->status() == 0) {
+		cout << "SecKey view fail" << endl;
+		return;
+	}
+
+	cout << "The SecKey information of the last seven days is as follows: " << endl;
+	cout << resData->data() << endl;
+
+	delete factory;
+	delete codec;
 }

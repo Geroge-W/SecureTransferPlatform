@@ -28,6 +28,8 @@ public:
 	bool writeSecKey(ShmNodeInfo* pNode);
 	/* 根据keyID查找密钥，将密钥标记为不可用 */
 	bool cancelSecKey(string secKeyID);
+	/* 查询最近N天的密钥信息 */
+	bool getLastNDaysInfo(int n, string& output);
 	/* 关闭与数据库的连接 */
 	void closeDB();
 
