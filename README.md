@@ -91,7 +91,6 @@
      项目使用**MySQL**数据库进行数据存储，在实现时使用的是MySQL官方提供的C API，该模块提供了MySQLOP类，对数据库的增删改查操作进行了封装，部分代码如下：
 
      ```cpp
-     /* MySQL数据库操作的类 */
      class MySQLOP
      {
      public:
@@ -106,8 +105,10 @@
      	bool updateSecKeyID(int secKeyID);
      	/* 向数据库中写入秘钥的相关信息 */
      	bool writeSecKey(ShmNodeInfo* pNode);
-	    /* 根据keyID查找密钥，将密钥标记为不可用 */
-	    bool cancelSecKey(string secKeyID);
+     	/* 根据keyID查找密钥，将密钥标记为不可用 */
+     	bool cancelSecKey(string secKeyID);
+     	/* 查询最近N天的密钥信息 */
+     	bool getLastNDaysInfo(int n, string& output);
      	/* 关闭与数据库的连接 */
      	void closeDB();
      
@@ -125,6 +126,8 @@
      ```
 
 2. 密钥协商服务器&&客户端
+
+   ![](README.assets/客户端截图.png)
 
    原项目中仅实现了**密钥协商**部分的功能，在此基础上，我加入了**密钥校验**、**密钥注销**和**密钥查看**这三项功能。下面介绍这四项功能的主要流程。
 
