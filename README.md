@@ -106,6 +106,8 @@
      	bool updateSecKeyID(int secKeyID);
      	/* 向数据库中写入秘钥的相关信息 */
      	bool writeSecKey(ShmNodeInfo* pNode);
+	    /* 根据keyID查找密钥，将密钥标记为不可用 */
+	    bool cancelSecKey(string secKeyID);
      	/* 关闭与数据库的连接 */
      	void closeDB();
      
